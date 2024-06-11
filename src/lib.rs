@@ -9,20 +9,18 @@ use std::{
 };
 
 pub use input::OneBillionRowsChallengeRows;
-use rustc_hash::FxHasher;
+// use rustc_hash::FxHasher;
 pub use temperature::StationStats;
 use temperature::{FinalizedStationStats, UpscaledTempValue};
-type SelectedBuildHasher = BuildHasherDefault<FxHasher>;
+// type SelectedBuildHasher = BuildHasherDefault<FxHasher>;
+type SelectedBuildHasher = BuildHasherDefault<gxhash::GxHasher>;
 const MAX_STATION_NAMES: usize = 10_000;
 
 pub mod scalar {
     use super::*;
     /// Solve the challenge with a single thread and scalar style code.
     #[inline(always)]
-    pub fn solve_challenge<W: Write>(
-        input: OneBillionRowsChallengeRows<'_>,
-        writer: &mut W,
-    ) {
+    pub fn solve_challenge<W: Write>(input: OneBillionRowsChallengeRows<'_>, writer: &mut W) {
         let hasher = SelectedBuildHasher::default();
         let mut stats_per_station: HashMap<Box<[u8]>, StationStats, SelectedBuildHasher> =
             HashMap::with_capacity_and_hasher(MAX_STATION_NAMES, hasher);
@@ -165,10 +163,7 @@ pub mod simd {
     };
     /// Solve the challenge with a single thread using vectorized code.
     #[inline(always)]
-    pub fn solve_challenge<W: Write>(
-        input: OneBillionRowsChallengeRows<'_>,
-        writer: &mut W,
-    ) {
+    pub fn solve_challenge<W: Write>(input: OneBillionRowsChallengeRows<'_>, writer: &mut W) {
         let hasher = SelectedBuildHasher::default();
         let mut stats_per_station: HashMap<Box<[u8]>, StationStats, SelectedBuildHasher> =
             HashMap::with_capacity_and_hasher(MAX_STATION_NAMES, hasher);
@@ -326,7 +321,7 @@ pub mod simd {
                     });
                 }
                 // Use a binding here to simplify debuging if needed
-                
+
                 BufferExtracts {
                     number_of_records_found: unsafe {
                         u8::try_from(insert_at_position).unwrap_unchecked()
@@ -405,7 +400,7 @@ pub mod simd {
             let station_name_ends: [u8; 32] = station_name_ends.to_array();
             let station_name_lengths: [u8; 32] = station_name_lengths.to_array();
             let temp_values_times_ten: [i16; 32] = temp_values_times_ten.to_array();
-            
+
             let lookup_metadata = |idx: usize| {
                 let temperature_value = unsafe { *temp_values_times_ten.get_unchecked(idx) };
                 let station_name_ends_at = *unsafe { station_name_ends.get_unchecked(idx) };
@@ -553,7 +548,6 @@ fn write_summary<T: Borrow<[u8]>, W: Write>(
 
     let _ = writer.write(&[b'}', b'\n']);
 }
-
 
 #[cfg(test)]
 mod tests {

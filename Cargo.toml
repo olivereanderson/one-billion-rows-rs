@@ -11,6 +11,8 @@ lto = true
 [dependencies]
 # Provides FxHash used within rustc
 rustc-hash = "1.1"
+# A very new high performance hasher
+gxhash = "3.4"
 # For memory mapping
 memmap = "0.7.0"
 

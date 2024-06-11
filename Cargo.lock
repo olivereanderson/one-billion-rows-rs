@@ -3,6 +3,15 @@
 version = 3
 
 [[package]]
+name = "gxhash"
+version = "3.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a197c9b654827513cf53842c5c6d3da2b4b35a785f8e0eff78bdf8e445aba1bb"
+dependencies = [
+ "rustversion",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.155"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -22,6 +31,7 @@ dependencies = [
 name = "one-billion-rows-rs"
 version = "0.1.0"
 dependencies = [
+ "gxhash",
  "memmap",
  "paste",
  "rustc-hash",
@@ -38,6 +48,12 @@ name = "rustc-hash"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
+
+[[package]]
+name = "rustversion"
+version = "1.0.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "955d28af4278de8121b7ebeb796b6a45735dc01436d898801014aced2773a3d6"
 
 [[package]]
 name = "winapi"
