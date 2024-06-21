@@ -16,7 +16,7 @@ use std::{
 
 #[cfg(feature = "gxhash")]
 use gxhash::GxHasher as SelectedHasher;
-pub use input::OneBillionRowsChallengeRows;
+pub use input::RowsFile;
 #[cfg(not(feature = "gxhash"))]
 use rustc_hash::FxHasher as SelectedHasher;
 pub use temperature::StationStats;
@@ -111,8 +111,8 @@ mod tests {
             paste::item! {
                 #[test]
                 fn [< scalar_single_thread_ $num_rows _rows >] () {
-                    let input = std::fs::read(format!("measurements_{}.txt", stringify!($num_rows))).unwrap();
-                    let input = unsafe {OneBillionRowsChallengeRows::new(&input)};
+                    let input = format!("measurements_{}.txt", stringify!($num_rows));
+                    let input = unsafe {RowsFile::new(input)};
                     let expected = std::fs::read(format!("expected_output_{}.txt", stringify!($num_rows))).unwrap();
                     let mut result = Vec::new();
                     scalar::solve_challenge(input, &mut result);
@@ -126,8 +126,8 @@ mod tests {
                 #[cfg(feature = "arena-allocation")]
                 #[test]
                 fn [< scalar_single_thread_ arena_allocation_ $num_rows _rows >] () {
-                    let input = std::fs::read(format!("measurements_{}.txt", stringify!($num_rows))).unwrap();
-                    let input = unsafe {OneBillionRowsChallengeRows::new(&input)};
+                    let input = format!("measurements_{}.txt", stringify!($num_rows));
+                    let input = unsafe {RowsFile::new(input)};
                     let expected = std::fs::read(format!("expected_output_{}.txt", stringify!($num_rows))).unwrap();
                     let mut result = Vec::new();
                     scalar::solve_challenge_with_arena(input, &mut result);
@@ -141,8 +141,8 @@ mod tests {
                 #[cfg(feature = "simd")]
                 #[test]
                 fn [< simd_single_thread_ $num_rows _rows >] () {
-                    let input = std::fs::read(format!("measurements_{}.txt", stringify!($num_rows))).unwrap();
-                    let input = unsafe {OneBillionRowsChallengeRows::new(&input)};
+                    let input = format!("measurements_{}.txt", stringify!($num_rows));
+                    let input = unsafe {RowsFile::new(&input)};
                     let expected = std::fs::read(format!("expected_output_{}.txt", stringify!($num_rows))).unwrap();
                     let mut result = Vec::new();
                     simd::solve_challenge(input, &mut result);
@@ -160,8 +160,8 @@ mod tests {
             paste::item! {
                 #[test]
                 fn [< scalar_ $num_threads _threads_ $num_rows _rows >] () {
-                    let input = std::fs::read(format!("measurements_{}.txt", stringify!($num_rows))).unwrap();
-                    let input = unsafe {OneBillionRowsChallengeRows::new(&input)};
+                    let input = format!("measurements_{}.txt", stringify!($num_rows));
+                    let input = unsafe {RowsFile::new(input)};
                     let expected = std::fs::read(format!("expected_output_{}.txt", stringify!($num_rows))).unwrap();
                     let mut result = Vec::new();
                     scalar::solve_challenge_with_threads(input, &mut result, $num_threads);
@@ -175,8 +175,8 @@ mod tests {
                 #[cfg(feature = "simd")]
                 #[test]
                 fn [< simd_ $num_threads _threads_ $num_rows _rows >] () {
-                    let input = std::fs::read(format!("measurements_{}.txt", stringify!($num_rows))).unwrap();
-                    let input = unsafe {OneBillionRowsChallengeRows::new(&input)};
+                    let input = format!("measurements_{}.txt", stringify!($num_rows));
+                    let input = unsafe {RowsFile::new(input)};
                     let expected = std::fs::read(format!("expected_output_{}.txt", stringify!($num_rows))).unwrap();
                     let mut result = Vec::new();
                     simd::solve_challenge_with_threads(input, &mut result, $num_threads);

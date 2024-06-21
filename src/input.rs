@@ -1,5 +1,19 @@
-pub struct OneBillionRowsChallengeRows<'input>(pub(crate) &'input [u8]);
-impl<'input> OneBillionRowsChallengeRows<'input> {
+use std::{fs::File, path::Path};
+
+use mmap_rs::{Mmap, MmapFlags, MmapOptions, PageSize};
+
+pub struct RowsFile(pub(crate) File);
+
+pub(crate) struct RowsFileMmap(Mmap);
+
+impl RowsFileMmap {
+    pub(crate) fn rows(&self) -> OneBillionRowsChallengeRows<'_> {
+        debug_assert_eq!(self.0[self.0.len() - 1], b'\n');
+        OneBillionRowsChallengeRows(&self.0)
+    }
+}
+
+impl RowsFile {
     /// This is the only constructor.
     ///
     /// # SAFETY
@@ -7,13 +21,31 @@ impl<'input> OneBillionRowsChallengeRows<'input> {
     /// By calling this method you acknowledge that you  have checked that this
     /// corresponds to at most one billion rows extracted from the one billion rows
     /// challenge input where input starts with the first byte of a station name
-    /// and ends with a newline character `\n`.
-    #[inline(always)]
-    pub unsafe fn new(input: &'input [u8]) -> Self {
-        debug_assert_eq!(input[input.len() - 1], b'\n');
-        Self(input)
+    /// and ends with a newline character `\n`. It is also crucial that the file
+    /// is not mutated for the duration of this `RowsFile`.
+    pub unsafe fn new<P: AsRef<Path>>(filepath: P) -> Self {
+        Self(std::fs::File::open(filepath).unwrap())
     }
 
+    pub(crate) fn mmap(&self) -> RowsFileMmap {
+        let size = self.0.metadata().unwrap().len();
+        let map_options = MmapOptions::new(size as usize).unwrap();
+        let mmap = unsafe {
+            map_options
+                .with_file(&self.0, 0)
+                // .with_page_size(PageSize::_2M)
+                .with_flags(MmapFlags::TRANSPARENT_HUGE_PAGES)
+                .map()
+        };
+        //dbg!(MmapOptions::page_sizes());
+        //dbg!(&mmap);
+
+        RowsFileMmap(mmap.unwrap())
+    }
+}
+
+pub struct OneBillionRowsChallengeRows<'input>(pub(crate) &'input [u8]);
+impl<'input> OneBillionRowsChallengeRows<'input> {
     /// Returns an iterator of up to `num_chunks` items. These are non-overlapping
     /// subsets of rows that collectively cover `self`.
     ///

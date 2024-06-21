@@ -1,7 +1,11 @@
+use self::input::{OneBillionRowsChallengeRows, RowsFile};
+
 use super::*;
 /// Solve the challenge with a single thread and scalar style code.
 #[inline(always)]
-pub fn solve_challenge<W: Write>(input: OneBillionRowsChallengeRows<'_>, writer: &mut W) {
+pub fn solve_challenge<W: Write>(input: RowsFile, writer: &mut W) {
+    let mmap = input.mmap();
+    let input = mmap.rows();
     let hasher = SelectedBuildHasher::default();
     let mut stats_per_station: HashMap<Box<[u8]>, StationStats, SelectedBuildHasher> =
         HashMap::with_capacity_and_hasher(MAX_STATION_NAMES, hasher);
@@ -12,14 +16,12 @@ pub fn solve_challenge<W: Write>(input: OneBillionRowsChallengeRows<'_>, writer:
 
 /// Solve the challenge with up to the given number of threads using scalar style code.
 #[inline(always)]
-pub fn solve_challenge_with_threads<W: Write>(
-    input: OneBillionRowsChallengeRows<'_>,
-    writer: &mut W,
-    num_threads: usize,
-) {
+pub fn solve_challenge_with_threads<W: Write>(input: RowsFile, writer: &mut W, num_threads: usize) {
     if num_threads < 2 {
         return solve_challenge(input, writer);
     }
+    let mmap = input.mmap();
+    let input = mmap.rows();
     let joined_maps = std::thread::scope(|s| {
         let mut handles: Vec<_> = input
             .chunks(num_threads)
