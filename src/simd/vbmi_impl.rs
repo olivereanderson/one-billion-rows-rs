@@ -23,7 +23,7 @@ pub(crate) fn collect_stats_simd(
     let bytes_to_process = input.len();
     while buffer_end <= bytes_to_process {
         let buffer: [u8; BUFFER_SIZE] = unsafe {
-            (&input[buffer_start..buffer_end])
+            (input.get_unchecked(buffer_start..buffer_end))
                 .try_into()
                 .unwrap_unchecked()
         };
