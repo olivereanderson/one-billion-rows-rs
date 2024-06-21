@@ -1,6 +1,6 @@
 use std::{fs::File, path::Path};
 
-use mmap_rs::{Mmap, MmapFlags, MmapOptions, PageSize};
+use memmap::Mmap;
 
 pub struct RowsFile(pub(crate) File);
 
@@ -28,19 +28,8 @@ impl RowsFile {
     }
 
     pub(crate) fn mmap(&self) -> RowsFileMmap {
-        let size = self.0.metadata().unwrap().len();
-        let map_options = MmapOptions::new(size as usize).unwrap();
-        let mmap = unsafe {
-            map_options
-                .with_file(&self.0, 0)
-                // .with_page_size(PageSize::_2M)
-                .with_flags(MmapFlags::TRANSPARENT_HUGE_PAGES)
-                .map()
-        };
-        //dbg!(MmapOptions::page_sizes());
-        //dbg!(&mmap);
-
-        RowsFileMmap(mmap.unwrap())
+        let mmap = unsafe { Mmap::map(&self.0) }.unwrap();
+        RowsFileMmap(mmap)
     }
 }
 
